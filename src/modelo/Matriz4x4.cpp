@@ -7,6 +7,7 @@
 #include <array>
 #include <stdexcept>
 #include <initializer_list>
+#include <optional>
 
 Matriz4x4::Matriz4x4()
 {
@@ -82,7 +83,6 @@ Matriz4x4 Matriz4x4::operator*(const Matriz4x4 &multiplo) const
     return Matriz4x4(resultado);
 }
 
-
 Vector3 Matriz4x4::operator*(const Vector3 &multiplo) const
 {
 
@@ -101,7 +101,6 @@ Vector3 Matriz4x4::operator*(const Vector3 &multiplo) const
     }
     else
     {
-
         Vector4 final(r0, r1, r2, r3);
         return final.toVector3();
     }
@@ -172,30 +171,35 @@ Matriz4x4 Matriz4x4::rotacion_z(float angulo)
 
 Matriz4x4 Matriz4x4::lookAt(const Camara &camara)
 {
-
-    // Esto es muy caro, hay que revisar si es necesario reconstruir la base o hay floritura
-    Vector3 delante = (camara.target - camara.eye).normalizar();
-    Vector3 derecha = delante.productoVectorial(camara.up).normalizar();
-    Vector3 arriba = derecha.productoVectorial(delante).normalizar();
+    Vector3 forward = (camara.target - camara.eye).normalizar();
+    Vector3 right = forward.productoVectorial(camara.up).normalizar();
+    Vector3 up = right.productoVectorial(forward).normalizar();
 
     Matriz4x4 resultado;
 
-    resultado.matriz[0][0] = derecha.get_x();
-    resultado.matriz[0][1] = derecha.get_y();
-    resultado.matriz[0][2] = derecha.get_z();
-    resultado.matriz[0][3] = -(camara.eye.productoEscalar(derecha));
-    resultado.matriz[1][0] = arriba.get_x();
-    resultado.matriz[1][1] = arriba.get_y();
-    resultado.matriz[1][2] = arriba.get_z();
-    resultado.matriz[1][3] = -(camara.eye.productoEscalar(arriba));
-    resultado.matriz[2][0] = -delante.get_x();
-    resultado.matriz[2][1] = -delante.get_y();
-    resultado.matriz[2][2] = -delante.get_z();
-    resultado.matriz[2][3] = -(camara.eye.productoEscalar(delante));
-    resultado.matriz[3][0] = 0;
-    resultado.matriz[3][1] = 0;
-    resultado.matriz[3][2] = 0;
-    resultado.matriz[3][3] = 1;
+    // Fila 0: right
+    resultado.matriz[0][0] = right.get_x();
+    resultado.matriz[0][1] = right.get_y();
+    resultado.matriz[0][2] = right.get_z();
+    resultado.matriz[0][3] = -right.productoEscalar(camara.eye);
+
+    // Fila 1: up
+    resultado.matriz[1][0] = up.get_x();
+    resultado.matriz[1][1] = up.get_y();
+    resultado.matriz[1][2] = up.get_z();
+    resultado.matriz[1][3] = -up.productoEscalar(camara.eye);
+
+    // Fila 2: -forward
+    resultado.matriz[2][0] = -forward.get_x();
+    resultado.matriz[2][1] = -forward.get_y();
+    resultado.matriz[2][2] = -forward.get_z();
+    resultado.matriz[2][3] = -forward.productoEscalar(camara.eye);
+
+    // Fila 3
+    resultado.matriz[3][0] = 0.0f;
+    resultado.matriz[3][1] = 0.0f;
+    resultado.matriz[3][2] = 0.0f;
+    resultado.matriz[3][3] = 1.0f;
 
     return resultado;
 }
@@ -203,4 +207,31 @@ Matriz4x4 Matriz4x4::lookAt(const Camara &camara)
 float Matriz4x4::getElemento(int fila, int columna) const
 {
     return this->matriz[fila][columna];
+}
+
+void Matriz4x4::setElemento(int fila, int columna, float elemento)
+{
+    this->matriz[fila][columna] = elemento;
+}
+
+std::optional<Matriz4x4> Matriz4x4::crearOrtografica(const Matematicas::proyeccionOrtografica &proyeccion)
+{
+    if (Matematicas::floatIguales(proyeccion.derecha, proyeccion.izquierda) ||
+        Matematicas::floatIguales(proyeccion.arriba, proyeccion.abajo) ||
+        Matematicas::floatIguales(proyeccion.lejos, proyeccion.cerca))
+    {
+        return std::nullopt;
+    }
+    Matriz4x4 m;
+
+    // Diagonal principal
+    m.matriz[0][0] = 2.0f / (proyeccion.derecha - proyeccion.izquierda);
+    m.matriz[1][1] = 2.0f / (proyeccion.arriba - proyeccion.abajo);
+    m.matriz[2][2] = -(2.0f / (proyeccion.lejos - proyeccion.cerca));
+    // Columna 4
+    m.matriz[0][3] = -((proyeccion.derecha + proyeccion.izquierda) / (proyeccion.derecha - proyeccion.izquierda));
+    m.matriz[1][3] = -((proyeccion.arriba + proyeccion.abajo) / (proyeccion.arriba - proyeccion.abajo));
+    m.matriz[2][3] = -((proyeccion.lejos + proyeccion.cerca) / (proyeccion.lejos - proyeccion.cerca));
+
+    return m;
 }

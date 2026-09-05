@@ -45,8 +45,9 @@ void Camara::update(float dt)
 
 void Camara::updateEye()
 {
-    // Por coordenadas esféricas
-    this->eye.set_x(distancia * cos(anguloV) * cos(anguloH));
+    // Coordenadas esféricas: ánguloH desde el eje Z (no desde el eje X)
+    this->eye.set_x(distancia * cos(anguloV) * sin(anguloH));
     this->eye.set_y(distancia * sin(anguloV));
-    this->eye.set_z(distancia * cos(anguloV) * sin(anguloH));
+    this->eye.set_z(distancia * cos(anguloV) * cos(anguloH));
 }
+
