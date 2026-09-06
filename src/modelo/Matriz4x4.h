@@ -1,10 +1,13 @@
 #ifndef MATRIZ4X4_H
 #define MATRIZ4X4_H
 
+#include "Utilidades.h"
 #include "Camara.h"
+
 
 #include <array>
 #include <initializer_list>
+#include <optional>
 
 class Vector3;
 
@@ -20,6 +23,7 @@ class Matriz4x4{
     Matriz4x4(std::initializer_list<float> valores);
     //Por comodidad para el cálculo
     Matriz4x4(const std::array<float, 16>& valores);
+    
 
     //Operadores de multiplicacion necesarios
     Matriz4x4 operator*(const Matriz4x4& multiplo) const;
@@ -41,5 +45,13 @@ class Matriz4x4{
     //Método para la cámara
     static Matriz4x4 lookAt(const Camara& camara);
 
+    static std::optional<Matriz4x4> crearOrtografica(const Matematicas::proyeccionOrtografica& proyeccion);
+
+
+    // Helper
+    // Solo necesario de forma temporal para el benchmarking, evitar que el compilador optimice más de lo que queremos
+    float getElemento(int fila, int columna) const ;
+    // Setter 
+    void setElemento(int fila, int columna, float elemento) ;
 };
 #endif

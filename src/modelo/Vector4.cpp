@@ -4,9 +4,8 @@
 
 #include <array>
 
-
-Vector4::Vector4(float x, float y, float z, float w) 
-    : x(x), y(y), z(z), w(w) {} 
+Vector4::Vector4(float x, float y, float z, float w)
+    : x(x), y(y), z(z), w(w) {}
 
 Vector4::Vector4(const Vector3 &vector)
 {
@@ -15,14 +14,13 @@ Vector4::Vector4(const Vector3 &vector)
     this->z = vector.get_z();
 }
 
-Vector4::Vector4(const std::array<float, 4>& array)
+Vector4::Vector4(const std::array<float, 4> &array)
 {
     this->x = array[0];
     this->y = array[1];
     this->z = array[2];
     this->w = array[3];
 }
-
 
 Vector3 Vector4::toVector3() const
 {
@@ -35,7 +33,7 @@ Vector3 Vector4::toVector3() const
 
 Vector4 Vector4::operator*(float multiplo)
 {
-    Vector4 solucion({0,0,0,0});
+    Vector4 solucion({0, 0, 0, 0});
     solucion.set_x(this->x *= multiplo);
     solucion.set_y(this->y *= multiplo);
     solucion.set_z(this->z *= multiplo);
@@ -55,11 +53,10 @@ std::array<float, 4> Vector4::toArray() const
 
 float Vector4::productoEscalar(float multiplo) const
 {
-    
+
     float au1 = this->x * multiplo;
     float au2 = this->y * multiplo;
     float au3 = this->z * multiplo;
     float au4 = this->w * multiplo;
     return (au1 + au2 + au3 + au4);
-
 }

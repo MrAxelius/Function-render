@@ -2,103 +2,126 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
+#include <utility>
 
 #include "modelo\Vector3.h"
 #include "modelo\Matriz4x4.h"
 #include "modelo\Camara.h"
+#include "vista\Vista.h"
+#include "Utilidades.h"
 
-// Pinta la cuadrícula
-void Pintar_Cuadricula(int mayor_Valor_Pantalla, int espacio_Entre_Casillas, sf::RenderWindow &window)
+void funcion2d(std::vector<sf::Drawable *> &dibujables, int menorValorPantalla, int alto_Pantalla)
 {
+    auto calculada = Matematicas::calcularFuncion(menorValorPantalla);
+    sf::VertexArray funcion(sf::PrimitiveType::LineStrip, calculada.size());
 
-    // Ejes
-    static sf::RectangleShape Eje_x(sf::Vector2f(10000.f, 1.f));
-    static sf::RectangleShape Eje_y(sf::Vector2f(1.f, 10000.f));
-
-    // Color
-    Eje_x.setFillColor(sf::Color::Blue);
-    Eje_y.setFillColor(sf::Color::Magenta);
-
-    // Dibujar la cuadrícula
-    for (size_t i = 0.f; i < mayor_Valor_Pantalla; i += espacio_Entre_Casillas)
+    for (size_t i = 0; i < calculada.size(); ++i)
     {
-        // Espaciamos los ejes 10 px, para poder hacer un análisis de los resultados
-        Eje_x.setPosition(sf::Vector2f(0, i));
-        Eje_y.setPosition(sf::Vector2f(i, 0));
-
-        window.draw(Eje_x);
-        window.draw(Eje_y);
+        float enY = (alto_Pantalla / 2) - calculada[i].second;
+        funcion[i].position = sf::Vector2f(calculada[i].first, enY);
+        funcion[i].color = sf::Color::Green; // Asigna color
     }
+    dibujables.clear();
+    dibujables.push_back(&funcion);
 }
 
-sf::VertexArray Pintar_Funcion(int alto_Pantalla, int mayor_Valor_Pantalla, int espacio_Entre_Casillas)
+void superficie3d(std::vector<sf::Drawable *> &dibujables, Camara &camara, Controlador::configuracionPantalla &pantalla)
 {
-    // Declaracion de la funcion
-    // LineStrip usa cada vértice como inicio del siguiente
-    // Lo que permite representaciones continuas, no solo discretas
-    sf::VertexArray funcion(sf::PrimitiveType::LineStrip, mayor_Valor_Pantalla / 10);
+    Matematicas::funcionParametrica valores;
+    Matematicas::proyeccionOrtografica proyeccion;
+    static std::vector<Vector3> superficie;
+    superficie.reserve(valores.xPuntos * valores.yPuntos);
 
-    float x = 0;
-    float y;
+    Matriz4x4 vista = Matriz4x4::lookAt(camara);
 
-    // Pintar funcion
-    for (float i = 0; i < mayor_Valor_Pantalla / 10; i++)
-    {
+    superficie = Matematicas::calcularSuperficie(valores);
+    auto proyectar = Matriz4x4::crearOrtografica(proyeccion);
 
-        x = i * 10;
-        // Función
-        y = i * (-i);
-
-        // alto_Pantalla / 2 ubica el inicio de la función en el centro de la pantalla
-        funcion[i].position = sf::Vector2f(x, (alto_Pantalla / 2) - y);
-        funcion[i].color = sf::Color::Green;
+    if(!proyectar.has_value()){
+        proyectar = Matriz4x4();
     }
-    return funcion;
-}
+    auto matrizProyeccion = *proyectar;
 
+    static sf::VertexArray funcion;
+    funcion.clear();
+    funcion.setPrimitiveType(sf::PrimitiveType::TriangleStrip);
+
+    int filas = valores.xPuntos;
+    int columnas = valores.yPuntos;
+    int franjas = filas - 1;
+
+    int verticesPorFranja = columnas * 2;
+    int totalVertices = verticesPorFranja * franjas + 2 * (franjas - 1);
+    funcion.resize(totalVertices);
+
+    auto emitir = [&](int indice, int i, int j)
+    {
+        int idxPunto = i * columnas + j;
+        const Vector3 &punto = superficie[idxPunto];
+        auto ndc = matrizProyeccion * (vista * punto);
+        float x_pantalla = (ndc.get_x() + 1.0f) * (pantalla.ancho_Pantalla / 2.0f);
+        float y_pantalla = (ndc.get_y() + 1.0f) * (pantalla.alto_Pantalla / 2.0f);
+
+        float z = punto.get_z();
+        unsigned char intensidad = static_cast<unsigned char>((z + 1.0f) * 0.5f * 255.0f);
+
+        funcion[indice].position = sf::Vector2f(x_pantalla, y_pantalla);
+        funcion[indice].color = sf::Color(intensidad, 0, 255 - intensidad);
+    };
+
+    int indice = 0;
+    for (int i = 0; i < franjas; i++)
+    {
+        if (i > 0)
+        {
+            emitir(indice, i, columnas - 1);
+            ++indice;
+            emitir(indice, i, 0);
+            ++indice;
+        }
+
+        for (int j = 0; j < columnas; j++)
+        {
+            emitir(indice, i, j);
+            ++indice;
+            emitir(indice, i + 1, j);
+            ++indice;
+        }
+    }
+
+    dibujables.clear();
+    dibujables.push_back(&funcion);
+}
 int main()
 {
     // Configuración de ventana
-    int ancho_Pantalla = 800;
-    int alto_Pantalla = 600;
+    Controlador::configuracionPantalla pantalla;
+    std::cout << "ancho: " << pantalla.ancho_Pantalla << ", alto: " << pantalla.alto_Pantalla << std::endl;
     int espacio_Entre_Casillas = 10;
-    float mayor_Valor_Pantalla = std::max(ancho_Pantalla, alto_Pantalla);
+    float menorValorPantalla = std::min(pantalla.ancho_Pantalla, pantalla.alto_Pantalla);
 
-    sf::RenderWindow window(sf::VideoMode(ancho_Pantalla, alto_Pantalla), "Render de funciones");
+    sf::RenderWindow window(sf::VideoMode(pantalla.ancho_Pantalla, pantalla.alto_Pantalla), "Render de funciones");
+
+    Vista vista(pantalla.ancho_Pantalla, pantalla.alto_Pantalla, window);
+
     window.setFramerateLimit(60);
 
     sf::Event evento;
     sf::Clock reloj;
 
-    // --- INICIALIZACIÓN CORRECTA DE LA CÁMARA ---
     Camara camara;
     camara.anguloH = 0.0f;
-    camara.anguloV = 0.2f;
+    camara.anguloV = 0.0f;
     camara.distancia = 5.0f;
     camara.target = {0.0f, 0.0f, 0.0f};
     camara.up = {0.0f, 1.0f, 0.0f};
     camara.velocidadMovimiento = 2.0f;
-    camara.updateEye(); // Calcula eye inicial
+    camara.updateEye(); // Calcula eye = (0, 0, 5)
 
-    // Datos del cubo
-    std::vector<Vector3> cubo = {
-        {-1.0f, -1.0f, -1.0f},
-        { 1.0f, -1.0f, -1.0f},
-        { 1.0f,  1.0f, -1.0f},
-        {-1.0f,  1.0f, -1.0f},
-        {-1.0f, -1.0f,  1.0f},
-        { 1.0f, -1.0f,  1.0f},
-        { 1.0f,  1.0f,  1.0f},
-        {-1.0f,  1.0f,  1.0f}
-    };
-
-    std::vector<std::pair<int, int>> aristas = {
-        {0,1}, {1,2}, {2,3}, {3,0},
-        {4,5}, {5,6}, {6,7}, {7,4},
-        {0,4}, {1,5}, {2,6}, {3,7}
-    };
-
-    static bool Modo3D = false;
+    // Vector de elementos a dibujar
+    std::vector<sf::Drawable *> dibujables;
+    // Just in case, no creo que haya que dibujar más de 10 funciones juntas.
+    dibujables.reserve(10);
 
     while (window.isOpen())
     {
@@ -109,64 +132,23 @@ int main()
                 window.close();
 
             if (evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::M)
-                Modo3D = !Modo3D;
+                vista.invertirModo3d();
+            if (!vista.getModo3d() && evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::E)
+            {
+                vista.cambioEjes();
+            }
         }
 
         // 2. Delta time
         float dt = reloj.restart().asSeconds();
-
-        // 3. ACTUALIZAR CÁMARA (esto faltaba)
         camara.update(dt);
+        // PIPELINE 2D
+        // funcion2d(dibujables, menorValorPantalla, pantalla.alto_Pantalla);
 
-        if (!Modo3D)
-        {
-            // Modo 2D
-            window.clear();
-            auto funcion = Pintar_Funcion(alto_Pantalla, mayor_Valor_Pantalla, espacio_Entre_Casillas);
-            Pintar_Cuadricula(mayor_Valor_Pantalla, espacio_Entre_Casillas, window);
-            window.draw(funcion);
-            window.display();
-        }
-        else
-        {
-            // 4. Matriz de vista
-            Matriz4x4 vista = Matriz4x4::lookAt(camara);
+        // PIPELINE 3D
+        superficie3d(dibujables, camara, pantalla);
 
-            // 5. Rotación del cubo
-            static float angulo = 0.0f;
-            angulo += 1.0f * dt;
-            Matriz4x4 rotacion = Matriz4x4::rotacion_y(angulo);
-
-            // 6. Transformar y proyectar
-            std::vector<sf::Vector2f> puntosProyectados;
-            puntosProyectados.reserve(cubo.size());
-
-            for (const auto& vertice : cubo)
-            {
-                Vector3 puntoMundo = rotacion * vertice;
-                Vector3 puntoCamara = vista * puntoMundo;
-
-                float x_pantalla = puntoCamara.get_x() * 100.0f + 400.0f;
-                float y_pantalla = puntoCamara.get_y() * 100.0f + 300.0f;
-                puntosProyectados.push_back(sf::Vector2f(x_pantalla, y_pantalla));
-            }
-
-            // 7. Dibujar aristas
-            sf::VertexArray lineas(sf::Lines, aristas.size() * 2);
-            for (size_t i = 0; i < aristas.size(); ++i)
-            {
-                int i1 = aristas[i].first;
-                int i2 = aristas[i].second;
-                lineas[2*i].position = puntosProyectados[i1];
-                lineas[2*i+1].position = puntosProyectados[i2];
-                lineas[2*i].color = sf::Color::White;
-                lineas[2*i+1].color = sf::Color::White;
-            }
-
-            window.clear();
-            window.draw(lineas);
-            window.display();
-        }
+        vista.mostrar(dibujables);
     }
 
     return 0;
