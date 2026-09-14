@@ -38,7 +38,7 @@ namespace Matematicas
     inline std::vector<std::pair<float, float>> calcularFuncion(int limite)
     {
         std::vector<std::pair<float, float>> funcion;
-        funcion.resize(100);
+        funcion.resize(limite / 10);
         float x = 0;
         float y;
 

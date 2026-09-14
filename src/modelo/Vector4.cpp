@@ -34,10 +34,10 @@ Vector3 Vector4::toVector3() const
 Vector4 Vector4::operator*(float multiplo)
 {
     Vector4 solucion({0, 0, 0, 0});
-    solucion.set_x(this->x *= multiplo);
-    solucion.set_y(this->y *= multiplo);
-    solucion.set_z(this->z *= multiplo);
-    solucion.set_w(this->w *= multiplo);
+    solucion.set_x(this->x * multiplo);
+    solucion.set_y(this->y * multiplo);
+    solucion.set_z(this->z * multiplo);
+    solucion.set_w(this->w * multiplo);
     return solucion;
 }
 

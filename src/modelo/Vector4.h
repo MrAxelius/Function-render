@@ -28,7 +28,6 @@ class Vector4
     float get_w() const{ return this->w; }
 
     //setters
-    
     void set_x(float numero) { this->x = numero; }
     void set_y(float numero) { this->y = numero; }
     void set_z(float numero) { this->z = numero; }
@@ -39,9 +38,8 @@ class Vector4
     Vector3 toVector3() const;
 
     //Necesarios como pasos intermedios
-    float productoEscalar(float multiplo) const;
+    float componentesEscaladas(float multiplo) const;
     
-    //Modifica el vector actual
     Vector4 operator*(float multiplo);
 
     //Por comodidad operativa

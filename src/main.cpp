@@ -10,14 +10,14 @@
 #include "vista\Vista.h"
 #include "Utilidades.h"
 
-void funcion2d(std::vector<sf::Drawable *> &dibujables, int menorValorPantalla, int alto_Pantalla)
+void funcion2d(std::vector<sf::Drawable *> &dibujables, int menorValorPantalla, Controlador::configuracionPantalla &pantalla)
 {
     auto calculada = Matematicas::calcularFuncion(menorValorPantalla);
-    sf::VertexArray funcion(sf::PrimitiveType::LineStrip, calculada.size());
+    static sf::VertexArray funcion(sf::PrimitiveType::LineStrip, calculada.size());
 
     for (size_t i = 0; i < calculada.size(); ++i)
     {
-        float enY = (alto_Pantalla / 2) - calculada[i].second;
+        float enY = (pantalla.alto_Pantalla / 2) - calculada[i].second;
         funcion[i].position = sf::Vector2f(calculada[i].first, enY);
         funcion[i].color = sf::Color::Green; // Asigna color
     }
@@ -37,7 +37,8 @@ void superficie3d(std::vector<sf::Drawable *> &dibujables, Camara &camara, Contr
     superficie = Matematicas::calcularSuperficie(valores);
     auto proyectar = Matriz4x4::crearOrtografica(proyeccion);
 
-    if(!proyectar.has_value()){
+    if (!proyectar.has_value())
+    {
         proyectar = Matriz4x4();
     }
     auto matrizProyeccion = *proyectar;
@@ -54,6 +55,7 @@ void superficie3d(std::vector<sf::Drawable *> &dibujables, Camara &camara, Contr
     int totalVertices = verticesPorFranja * franjas + 2 * (franjas - 1);
     funcion.resize(totalVertices);
 
+    // función Lambda
     auto emitir = [&](int indice, int i, int j)
     {
         int idxPunto = i * columnas + j;
@@ -123,6 +125,8 @@ int main()
     // Just in case, no creo que haya que dibujar más de 10 funciones juntas.
     dibujables.reserve(10);
 
+    superficie3d(dibujables, camara, pantalla);
+
     while (window.isOpen())
     {
         // 1. Procesar eventos
@@ -142,11 +146,16 @@ int main()
         // 2. Delta time
         float dt = reloj.restart().asSeconds();
         camara.update(dt);
-        // PIPELINE 2D
-        // funcion2d(dibujables, menorValorPantalla, pantalla.alto_Pantalla);
-
-        // PIPELINE 3D
-        superficie3d(dibujables, camara, pantalla);
+        if (!vista.getModo3d())
+        {
+            // PIPELINE 2D
+            funcion2d(dibujables, menorValorPantalla, pantalla);
+        }
+        else
+        {
+            // PIPELINE 3D
+            // superficie3d(dibujables, camara, pantalla);
+        }
 
         vista.mostrar(dibujables);
     }

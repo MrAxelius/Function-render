@@ -31,20 +31,14 @@ Matriz4x4::Matriz4x4(std::initializer_list<float> valores)
     {
         throw std::invalid_argument("La lista de elementos debe tener 16 elementos");
     }
-    int fila = 0;
-    int columna = -1;
-    if (valores.size() == 16)
+
+    int contadorDesdoblado = 0;
+    for(auto v : valores)
     {
-        for (float i : valores)
-        {
-            columna++;
-            matriz[fila][columna] = i;
-            if (columna == 3)
-            {
-                columna = 0;
-                fila++;
-            }
-        }
+        // La división literal da la fila, pasa de 1 en 1 cada 4 elementos
+        // El modulo(resto) suma 1 por elemento, pero se resetea cada 4 al ser múltiplo
+        matriz[contadorDesdoblado / 4][contadorDesdoblado % 4] = v;
+        ++contadorDesdoblado;
     }
 }
 
@@ -136,10 +130,10 @@ Matriz4x4 Matriz4x4::rotacion_x(float angulo)
     Matriz4x4 resultado;
 
     // Rotación sobre el eje horizontal
-    resultado.matriz[1][1] = cos(angulo);
-    resultado.matriz[1][2] = -(sin(angulo));
-    resultado.matriz[2][1] = sin(angulo);
-    resultado.matriz[2][2] = cos(angulo);
+    resultado.matriz[1][1] = std::cos(angulo);
+    resultado.matriz[1][2] = -(std::sin(angulo));
+    resultado.matriz[2][1] = std::sin(angulo);
+    resultado.matriz[2][2] = std::cos(angulo);
     return resultado;
 }
 
@@ -149,10 +143,10 @@ Matriz4x4 Matriz4x4::rotacion_y(float angulo)
     Matriz4x4 resultado;
 
     // Rotación sobre el eje vertical
-    resultado.matriz[0][0] = cos(angulo);
-    resultado.matriz[0][2] = -(sin(angulo));
-    resultado.matriz[2][0] = sin(angulo);
-    resultado.matriz[2][2] = cos(angulo);
+    resultado.matriz[0][0] = std::cos(angulo);
+    resultado.matriz[0][2] = -(std::sin(angulo));
+    resultado.matriz[2][0] = std::sin(angulo);
+    resultado.matriz[2][2] = std::cos(angulo);
     return resultado;
 }
 
@@ -162,10 +156,10 @@ Matriz4x4 Matriz4x4::rotacion_z(float angulo)
     Matriz4x4 resultado;
 
     // Rotación sobre el eje de profundidad
-    resultado.matriz[0][0] = cos(angulo);
-    resultado.matriz[0][1] = -(sin(angulo));
-    resultado.matriz[1][0] = sin(angulo);
-    resultado.matriz[1][1] = cos(angulo);
+    resultado.matriz[0][0] = std::cos(angulo);
+    resultado.matriz[0][1] = -(std::sin(angulo));
+    resultado.matriz[1][0] = std::sin(angulo);
+    resultado.matriz[1][1] = std::cos(angulo);
     return resultado;
 }
 
@@ -193,7 +187,7 @@ Matriz4x4 Matriz4x4::lookAt(const Camara &camara)
     resultado.matriz[2][0] = -forward.get_x();
     resultado.matriz[2][1] = -forward.get_y();
     resultado.matriz[2][2] = -forward.get_z();
-    resultado.matriz[2][3] = -forward.productoEscalar(camara.eye);
+    resultado.matriz[2][3] = forward.productoEscalar(camara.eye);
 
     // Fila 3
     resultado.matriz[3][0] = 0.0f;
@@ -227,11 +221,11 @@ std::optional<Matriz4x4> Matriz4x4::crearOrtografica(const Matematicas::proyecci
     // Diagonal principal
     m.matriz[0][0] = 2.0f / (proyeccion.derecha - proyeccion.izquierda);
     m.matriz[1][1] = 2.0f / (proyeccion.arriba - proyeccion.abajo);
-    m.matriz[2][2] = -(2.0f / (proyeccion.lejos - proyeccion.cerca));
+    m.matriz[2][2] = - (2.0f / (proyeccion.lejos - proyeccion.cerca));
     // Columna 4
-    m.matriz[0][3] = -((proyeccion.derecha + proyeccion.izquierda) / (proyeccion.derecha - proyeccion.izquierda));
-    m.matriz[1][3] = -((proyeccion.arriba + proyeccion.abajo) / (proyeccion.arriba - proyeccion.abajo));
-    m.matriz[2][3] = -((proyeccion.lejos + proyeccion.cerca) / (proyeccion.lejos - proyeccion.cerca));
+    m.matriz[0][3] = - ((proyeccion.derecha + proyeccion.izquierda) / (proyeccion.derecha - proyeccion.izquierda));
+    m.matriz[1][3] = - ((proyeccion.arriba + proyeccion.abajo) / (proyeccion.arriba - proyeccion.abajo));
+    m.matriz[2][3] = - ((proyeccion.lejos + proyeccion.cerca) / (proyeccion.lejos - proyeccion.cerca));
 
     return m;
 }

@@ -3,12 +3,12 @@
 Vista::Vista(int ResolucionH, int ResolucionV, sf::RenderWindow &ventana)
     : ResolucionH(ResolucionH), ResolucionV(ResolucionV), ventana(ventana) {}
 
-void Vista::mostrar(const std::vector<sf::Drawable*> &mostrado)
+void Vista::mostrar(const std::vector<sf::Drawable *> &mostrado)
 {
     ventana.clear();
     if (!modo3d)
     {
-        if(tipoEjes < 0 || tipoEjes > 2)
+        if (tipoEjes < 0 || tipoEjes > 2)
             tipoEjes = 0;
         switch (tipoEjes)
         {
@@ -26,7 +26,8 @@ void Vista::mostrar(const std::vector<sf::Drawable*> &mostrado)
     {
         // Añadir la lógica de proyección
     }
-    for(const sf::Drawable* item : mostrado){
+    for (const sf::Drawable *item : mostrado)
+    {
         this->ventana.draw(*item);
     }
     ventana.display();
@@ -66,8 +67,12 @@ void Vista::dibujarEjes()
 
     Eje_x.setPosition(sf::Vector2f(menorValorPantalla / 2, 0));
     Eje_y.setPosition(sf::Vector2f(0, menorValorPantalla / 2));
+
+    ventana.draw(Eje_x);
+    ventana.draw(Eje_y);
 }
 
+// Esto debería salir al controlador (main)
 void Vista::cambioEjes()
 {
     if (tipoEjes == 2)
