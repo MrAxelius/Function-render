@@ -1,11 +1,10 @@
 #include "Camara.h"
 
 #include <cmath>
-#include <SFML/Graphics.hpp>
 
-void Camara::update(float dt)
+void Camara::update(float dt, const Entrada &entrada)
 {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+    if (entrada.getVertical() == 1)
     {
         anguloV += dt * velocidadMovimiento;
         if (anguloV >= 1.57f)
@@ -13,27 +12,29 @@ void Camara::update(float dt)
             anguloV = 1.57f;
         }
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+    if (entrada.getVertical() == -1)
     {
-        anguloV -= dt * velocidadMovimiento;
         if (anguloV <= -1.57f)
         {
             anguloV = -1.57f;
         }
+        anguloV -= dt * velocidadMovimiento;
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+    if (entrada.getHorizontal() == 1)
     {
         anguloH += dt * velocidadMovimiento;
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+    if (entrada.getHorizontal() == -1)
     {
         anguloH -= dt * velocidadMovimiento;
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+    // No funciona bien
+    // Tests TODO
+    if (entrada.getZoom() == 1)
     {
         distancia += dt * velocidadMovimiento;
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+    if (entrada.getZoom() == -1)
     {
         if (distancia > 0.5f)
         {
@@ -46,8 +47,7 @@ void Camara::update(float dt)
 void Camara::updateEye()
 {
     // Coordenadas esféricas: ánguloH desde el eje Z (no desde el eje X)
-    this->eye.set_x(distancia * cos(anguloV) * sin(anguloH));
-    this->eye.set_y(distancia * sin(anguloV));
-    this->eye.set_z(distancia * cos(anguloV) * cos(anguloH));
+    this->eye.set_x(distancia * std::cos(anguloV) * std::sin(anguloH));
+    this->eye.set_y(distancia * std::sin(anguloV));
+    this->eye.set_z(distancia * std::cos(anguloV) * std::cos(anguloH));
 }
-

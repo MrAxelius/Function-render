@@ -2,6 +2,7 @@
 #define CAMARA_H
 
 #include "Vector3.h"
+#include "controlador/input.h"
 
 struct Camara {
 
@@ -15,7 +16,7 @@ struct Camara {
     //Velocidad a la que se mueven la cámara, de momento son valores de testeo
     float velocidadMovimiento = 10.0f;
 
-    void update(float dt);
+    void update(float dt, const Entrada &entrada);
     // No es necesario, debería ir en update, es por claridad
     // Y poder debuggear más fácil si algo falla
     // Prolly acabará unido en update

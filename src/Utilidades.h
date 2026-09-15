@@ -4,8 +4,8 @@
 #include <vector>
 #include <utility>
 
-#include "modelo\Vector3.h"
-#include "modelo\Vector4.h"
+#include "modelo/Vector3.h"
+#include "modelo/Vector4.h"
 
 namespace Matematicas
 {

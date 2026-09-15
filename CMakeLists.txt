@@ -5,9 +5,6 @@ project(Function_renderer)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Flag para generar ensamblador (opcional)
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /FA")
-
 # Descarga automática de SFML
 include(FetchContent)
 FetchContent_Declare(
@@ -25,7 +22,17 @@ add_executable(${PROJECT_NAME}
     src/modelo/Matriz4x4.cpp
     src/modelo/Camara.cpp
     src/vista/Vista.cpp
+    src/controlador/input.cpp
 )
+
+target_include_directories(${PROJECT_NAME} PRIVATE src)
+target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-window sfml-system)
+
+# Copiar las DLLs de SFML junto al ejecutable
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMAND_EXPAND_LISTS)
 
 # Incluir directorio src para cabeceras (Utilidades.h, etc.)
 target_include_directories(${PROJECT_NAME} PRIVATE src)
@@ -40,9 +47,7 @@ add_executable(benchmark_matriz
     src/modelo/Vector4.cpp
     src/modelo/Matriz4x4.cpp
 )
+target_compile_options(benchmark_matriz PRIVATE /FA)
 
 # También necesita el directorio src para incluir Utilidades.h
 target_include_directories(benchmark_matriz PRIVATE src)
-
-# Enlazar SFML (por si el benchmark usa gráficos, aunque no es necesario, no está de más)
-target_link_libraries(benchmark_matriz PRIVATE sfml-graphics sfml-window sfml-system)

@@ -19,7 +19,7 @@ float Vector3::magnitud() const
 void Vector3::normalizado()
 {
 
-    static float modulo = this->magnitud();
+    const float modulo = this->magnitud();
     if (modulo == 0)
     {
         throw std::invalid_argument("El modulo del vector es 0");
@@ -31,13 +31,12 @@ void Vector3::normalizado()
 
 // Dividimos por el módulo, creamos otro vector
 Vector3 Vector3::normalizar() const
-{
-    static float modulo = this->magnitud();
+{ 
+    const float modulo = this->magnitud();
     if (modulo == 0)
     {
         throw std::invalid_argument("El modulo del vector es 0");
     }
-    float modulo = this->magnitud();
     float au1 = this->x / modulo;
     float au2 = this->y / modulo;
     float au3 = this->z / modulo;

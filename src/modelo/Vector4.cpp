@@ -51,7 +51,7 @@ std::array<float, 4> Vector4::toArray() const
     return convertido;
 }
 
-float Vector4::productoEscalar(float multiplo) const
+float Vector4::componentesEscaladas(float multiplo) const
 {
 
     float au1 = this->x * multiplo;

@@ -4,11 +4,13 @@
 #include <vector>
 #include <utility>
 
-#include "modelo\Vector3.h"
-#include "modelo\Matriz4x4.h"
-#include "modelo\Camara.h"
-#include "vista\Vista.h"
+#include "modelo/Vector3.h"
+#include "modelo/Matriz4x4.h"
+#include "modelo/Camara.h"
+#include "vista/Vista.h"
 #include "Utilidades.h"
+#include "controlador/Input.h"
+#include "controlador/Entrada.h"
 
 void funcion2d(std::vector<sf::Drawable *> &dibujables, int menorValorPantalla, Controlador::configuracionPantalla &pantalla)
 {
@@ -124,9 +126,7 @@ int main()
     std::vector<sf::Drawable *> dibujables;
     // Just in case, no creo que haya que dibujar más de 10 funciones juntas.
     dibujables.reserve(10);
-
-    superficie3d(dibujables, camara, pantalla);
-
+    
     while (window.isOpen())
     {
         // 1. Procesar eventos
@@ -145,7 +145,9 @@ int main()
 
         // 2. Delta time
         float dt = reloj.restart().asSeconds();
-        camara.update(dt);
+
+        Entrada entrada = leerEntrada();
+        camara.update(dt, entrada);
         if (!vista.getModo3d())
         {
             // PIPELINE 2D
@@ -154,7 +156,7 @@ int main()
         else
         {
             // PIPELINE 3D
-            // superficie3d(dibujables, camara, pantalla);
+            superficie3d(dibujables, camara, pantalla);
         }
 
         vista.mostrar(dibujables);
