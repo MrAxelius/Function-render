@@ -23,12 +23,12 @@ cmake --build build --config Release
 El ejecutable se genera en build/Release/Function_renderer.exe
 
 ## Controles
-M -> Alterna modo
-W/S -> Orbita verticalmente
-A/D -> Orbita Horizontalmente
+- M -> Alterna modo
+- W/S -> Orbita verticalmente
+- A/D -> Orbita Horizontalmente
 
 ## Estructura de archivos
-Sigue una estructura MVC. Si bien esta estructura aún no es aplicada en su totalidad, porque la vista se encuentra en el main de forma temporal
+Sigue una estructura MVC.
 el código está en el /src
 src/
 |
