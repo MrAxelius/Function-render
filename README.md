@@ -7,7 +7,7 @@ En el estado actual, permite visualizar un cubo 3D, con rotaciones y cámara orb
 matemáticas básicas. Se puede alternar entre ambos modos desde el teclado.
 
 ## Que hace
-- **Modo 3D**: Muestra un cubo que rota sobre si mismo, el cual es orbitable con WASD. Se está trabajando en un zoom
+- **Modo 3D**: Muestra la superficie sin(x) * cos(y), la cual es orbitable con WASD. Se está trabajando en un zoom
 - **Modo 2D**: Representa la funcion 'y = - x ^ 2' sobre una cuadrícula.
 - **Cámara Orbital**: Control total por teclado
 - **Pipeline completo**: modelo -> vista -> proyección, implementado desde cero.
