@@ -83,7 +83,12 @@ namespace Controlador
 {
     struct configuracionPantalla
     {
-        int ancho_Pantalla = 800;
-        int alto_Pantalla = 600;
+        int anchoPantalla = 800;
+        int altoPantalla = 600;
+    };
+    struct rango
+    {
+        double xMin;
+        double xMax;
     };
 }

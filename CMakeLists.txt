@@ -1,11 +1,19 @@
-cmake_minimum_required(VERSION 3.15)
-project(Function_renderer)
+cmake_minimum_required(VERSION 3.20)
+project(Function_renderer LANGUAGES CXX)
 
-# Estándar C++17
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Descarga automática de SFML
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+if(MSVC)
+    add_compile_options(/utf-8 /W4)
+else()
+    add_compile_options(-Wall -Wextra)
+endif()
+
+# ---- DEPENDENCIAS ----
 include(FetchContent)
 FetchContent_Declare(
     sfml
@@ -14,19 +22,35 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(sfml)
 
-# ---- TARGET PRINCIPAL ----
-add_executable(${PROJECT_NAME}
-    src/main.cpp
+# Ruta a FunctionParser. Ajusta si mueves las carpetas.
+set(FUNCTIONPARSER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../FunctionParser"
+    CACHE PATH "Ruta al repositorio de FunctionParser")
+add_subdirectory(${FUNCTIONPARSER_DIR} ${CMAKE_BINARY_DIR}/FunctionParser)
+
+# ---- FUENTES COMPARTIDAS ----
+set(MODELO_SOURCES
     src/modelo/Vector3.cpp
     src/modelo/Vector4.cpp
     src/modelo/Matriz4x4.cpp
+)
+
+# ---- TARGET PRINCIPAL ----
+add_executable(${PROJECT_NAME}
+    src/main.cpp
+    ${MODELO_SOURCES}
     src/modelo/Camara.cpp
     src/vista/Vista.cpp
     src/controlador/input.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src)
-target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-window sfml-system)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    sfml-graphics
+    sfml-window
+    sfml-system
+    FunctionParser::FunctionParser
+)
 
 # Copiar las DLLs de SFML junto al ejecutable
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
@@ -34,20 +58,9 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}>
     COMMAND_EXPAND_LISTS)
 
-# Incluir directorio src para cabeceras (Utilidades.h, etc.)
-target_include_directories(${PROJECT_NAME} PRIVATE src)
-
-# Enlazar módulos de SFML
-target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-window sfml-system)
-
 # ---- BENCHMARK ----
 add_executable(benchmark_matriz
     tests/benchmark_matriz.cpp
-    src/modelo/Vector3.cpp
-    src/modelo/Vector4.cpp
-    src/modelo/Matriz4x4.cpp
+    ${MODELO_SOURCES}
 )
-target_compile_options(benchmark_matriz PRIVATE /FA)
-
-# También necesita el directorio src para incluir Utilidades.h
 target_include_directories(benchmark_matriz PRIVATE src)
