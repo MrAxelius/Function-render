@@ -1,25 +1,30 @@
 #pragma once
 
+#include <vector>
 #include <SFML/Graphics.hpp>
+#include <FunctionParser/FunctionParser.h>
+
+#include "Utilidades.h"
+#include "vista/Transformador.h"
 
 class Vista
 {
-    private:
-    int ResolucionH;
-    int ResolucionV;
-    // Ventana pasa como referencia
-    // No es valor, porque no es copiable, no es puntero por seguridad, evita nullptr
-    sf::RenderWindow& ventana;
+private:
+    Controlador::configuracionPantalla configuracion;
+    sf::RenderWindow &ventana;
+    Transformador transformador;
 
     bool modo3d = false;
     int tipoEjes = 0;
 
-    public:
-    Vista(int ResolucionH, int ResolucionV, sf::RenderWindow& ventana);
-    //Recibe ya el cuerpo limpio, y se llama por frame
-    void mostrar(const std::vector<sf::Drawable*> &mostrado);
+public:
+    Vista(Controlador::rango &rango, sf::RenderWindow &ventana);
+    // Recibe ya el cuerpo limpio, y se llama por frame
+    void mostrar(const std::vector<sf::Drawable *> &mostrado, const std::vector<FunctionParser::Punto> &puntos);
     void dibujarCuadricula();
     void dibujarEjes();
+
+    void funcion2d( const std::vector<FunctionParser::Punto>& puntos);
 
     void cambioEjes();
     void invertirModo3d() { this->modo3d = !modo3d; }

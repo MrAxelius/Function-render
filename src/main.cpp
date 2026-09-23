@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <utility>
+#include <FunctionParser/FunctionParser.h>
 
 #include "modelo/Vector3.h"
 #include "modelo/Matriz4x4.h"
@@ -12,20 +13,6 @@
 #include "controlador/Input.h"
 #include "controlador/Entrada.h"
 
-void funcion2d(std::vector<sf::Drawable *> &dibujables, int menorValorPantalla, Controlador::configuracionPantalla &pantalla)
-{
-    auto calculada = Matematicas::calcularFuncion(menorValorPantalla);
-    static sf::VertexArray funcion(sf::PrimitiveType::LineStrip, calculada.size());
-
-    for (size_t i = 0; i < calculada.size(); ++i)
-    {
-        float enY = (pantalla.alto_Pantalla / 2) - calculada[i].second;
-        funcion[i].position = sf::Vector2f(calculada[i].first, enY);
-        funcion[i].color = sf::Color::Green; // Asigna color
-    }
-    dibujables.clear();
-    dibujables.push_back(&funcion);
-}
 
 void superficie3d(std::vector<sf::Drawable *> &dibujables, Camara &camara, Controlador::configuracionPantalla &pantalla)
 {
@@ -63,8 +50,8 @@ void superficie3d(std::vector<sf::Drawable *> &dibujables, Camara &camara, Contr
         int idxPunto = i * columnas + j;
         const Vector3 &punto = superficie[idxPunto];
         auto ndc = matrizProyeccion * (vista * punto);
-        float x_pantalla = (ndc.get_x() + 1.0f) * (pantalla.ancho_Pantalla / 2.0f);
-        float y_pantalla = (ndc.get_y() + 1.0f) * (pantalla.alto_Pantalla / 2.0f);
+        float x_pantalla = (ndc.get_x() + 1.0f) * (pantalla.anchoPantalla / 2.0f);
+        float y_pantalla = (ndc.get_y() + 1.0f) * (pantalla.altoPantalla / 2.0f);
 
         float z = punto.get_z();
         unsigned char intensidad = static_cast<unsigned char>((z + 1.0f) * 0.5f * 255.0f);
@@ -100,13 +87,14 @@ int main()
 {
     // Configuración de ventana
     Controlador::configuracionPantalla pantalla;
-    std::cout << "ancho: " << pantalla.ancho_Pantalla << ", alto: " << pantalla.alto_Pantalla << std::endl;
+    Controlador::rango rango{-2, 2}; 
     int espacio_Entre_Casillas = 10;
-    float menorValorPantalla = std::min(pantalla.ancho_Pantalla, pantalla.alto_Pantalla);
+    float menorValorPantalla = std::min(pantalla.anchoPantalla, pantalla.altoPantalla);
 
-    sf::RenderWindow window(sf::VideoMode(pantalla.ancho_Pantalla, pantalla.alto_Pantalla), "Render de funciones");
+    sf::RenderWindow window(sf::VideoMode(pantalla.anchoPantalla, pantalla.altoPantalla), "Render de funciones");
 
-    Vista vista(pantalla.ancho_Pantalla, pantalla.alto_Pantalla, window);
+
+    Vista vista(rango, window);
 
     window.setFramerateLimit(60);
 
@@ -126,7 +114,11 @@ int main()
     std::vector<sf::Drawable *> dibujables;
     // Just in case, no creo que haya que dibujar más de 10 funciones juntas.
     dibujables.reserve(10);
-    
+
+    FunctionParser::Expression expresion(" x * x");
+    FunctionParser::Rango rangoFuncion{-2, 2, 99};
+    auto resultado = expresion.evaluateMesh(rangoFuncion);
+
     while (window.isOpen())
     {
         // 1. Procesar eventos
@@ -151,7 +143,7 @@ int main()
         if (!vista.getModo3d())
         {
             // PIPELINE 2D
-            funcion2d(dibujables, menorValorPantalla, pantalla);
+            vista.funcion2d(resultado);
         }
         else
         {
@@ -159,7 +151,7 @@ int main()
             superficie3d(dibujables, camara, pantalla);
         }
 
-        vista.mostrar(dibujables);
+        vista.mostrar(dibujables, resultado);
     }
 
     return 0;

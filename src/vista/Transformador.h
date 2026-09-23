@@ -30,6 +30,6 @@ public:
             yMin = - alturaMundo / 2;
         }
     
-    PuntoPantalla const Transformar(const FunctionParser::Punto& puntoMundo);
+    PuntoPantalla Transformar(const FunctionParser::Punto& puntoMundo) const;
 };
 

@@ -41,6 +41,7 @@ add_executable(${PROJECT_NAME}
     src/modelo/Camara.cpp
     src/vista/Vista.cpp
     src/controlador/input.cpp
+    src/vista/Transformador.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src)
@@ -53,10 +54,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 
 # Copiar las DLLs de SFML junto al ejecutable
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMAND_EXPAND_LISTS)
+# add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#    $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+#    COMMAND_EXPAND_LISTS)
 
 # ---- BENCHMARK ----
 add_executable(benchmark_matriz
