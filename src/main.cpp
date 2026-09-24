@@ -14,14 +14,14 @@
 #include "controlador/Entrada.h"
 
 
-void superficie3d(std::vector<sf::Drawable *> &dibujables, Camara &camara, Controlador::configuracionPantalla &pantalla)
+void superficie3d(Vista& vista, Camara &camara)
 {
     Matematicas::funcionParametrica valores;
     Matematicas::proyeccionOrtografica proyeccion;
-    static std::vector<Vector3> superficie;
+    std::vector<Vector3> superficie;
     superficie.reserve(valores.xPuntos * valores.yPuntos);
 
-    Matriz4x4 vista = Matriz4x4::lookAt(camara);
+    Matriz4x4 matrizVista = Matriz4x4::lookAt(camara);
 
     superficie = Matematicas::calcularSuperficie(valores);
     auto proyectar = Matriz4x4::crearOrtografica(proyeccion);
@@ -32,7 +32,7 @@ void superficie3d(std::vector<sf::Drawable *> &dibujables, Camara &camara, Contr
     }
     auto matrizProyeccion = *proyectar;
 
-    static sf::VertexArray funcion;
+    sf::VertexArray funcion;
     funcion.clear();
     funcion.setPrimitiveType(sf::PrimitiveType::TriangleStrip);
 
@@ -49,9 +49,9 @@ void superficie3d(std::vector<sf::Drawable *> &dibujables, Camara &camara, Contr
     {
         int idxPunto = i * columnas + j;
         const Vector3 &punto = superficie[idxPunto];
-        auto ndc = matrizProyeccion * (vista * punto);
-        float x_pantalla = (ndc.get_x() + 1.0f) * (pantalla.anchoPantalla / 2.0f);
-        float y_pantalla = (ndc.get_y() + 1.0f) * (pantalla.altoPantalla / 2.0f);
+        auto ndc = matrizProyeccion * (matrizVista * punto);
+        float x_pantalla = (ndc.get_x() + 1.0f) * (vista.getAnchoPantalla() / 2.0f);
+        float y_pantalla = (ndc.get_y() + 1.0f) * (vista.getAltoPantalla() / 2.0f);
 
         float z = punto.get_z();
         unsigned char intensidad = static_cast<unsigned char>((z + 1.0f) * 0.5f * 255.0f);
@@ -79,9 +79,7 @@ void superficie3d(std::vector<sf::Drawable *> &dibujables, Camara &camara, Contr
             ++indice;
         }
     }
-
-    dibujables.clear();
-    dibujables.push_back(&funcion);
+    vista.setSuperficie(funcion);
 }
 int main()
 {
@@ -143,15 +141,15 @@ int main()
         if (!vista.getModo3d())
         {
             // PIPELINE 2D
-            vista.funcion2d(resultado);
+            vista.construirFuncion(resultado);
         }
         else
         {
             // PIPELINE 3D
-            superficie3d(dibujables, camara, pantalla);
+            superficie3d(vista, camara);
         }
 
-        vista.mostrar(dibujables, resultado);
+        vista.mostrar();
     }
 
     return 0;
