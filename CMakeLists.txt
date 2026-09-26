@@ -39,6 +39,10 @@ else()
     )
 endif()
 
+# SFML: solo lo que usamos
+set(SFML_BUILD_AUDIO OFF CACHE BOOL "" FORCE)
+set(SFML_BUILD_NETWORK OFF CACHE BOOL "" FORCE)
+
 # FunctionParser no necesita compilar sus tests ni sus ejemplos aquí
 set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
