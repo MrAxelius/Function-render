@@ -15,17 +15,35 @@ endif()
 
 # ---- DEPENDENCIAS ----
 include(FetchContent)
+
 FetchContent_Declare(
     sfml
     GIT_REPOSITORY https://github.com/SFML/SFML.git
     GIT_TAG 2.6.1
 )
-FetchContent_MakeAvailable(sfml)
 
-# Ruta a FunctionParser. Ajusta si mueves las carpetas.
+# Ruta local a FunctionParser, para desarrollar los dos proyectos a la vez.
+# Si no existe, se descarga desde GitHub (necesario para el CI).
 set(FUNCTIONPARSER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../FunctionParser"
-    CACHE PATH "Ruta al repositorio de FunctionParser")
-add_subdirectory(${FUNCTIONPARSER_DIR} ${CMAKE_BINARY_DIR}/FunctionParser)
+    CACHE PATH "Ruta local al repositorio de FunctionParser")
+
+if(EXISTS "${FUNCTIONPARSER_DIR}/CMakeLists.txt")
+    message(STATUS "FunctionParser: usando copia local en ${FUNCTIONPARSER_DIR}")
+    FetchContent_Declare(FunctionParser SOURCE_DIR "${FUNCTIONPARSER_DIR}")
+else()
+    message(STATUS "FunctionParser: descargando desde GitHub")
+    FetchContent_Declare(
+        FunctionParser
+        GIT_REPOSITORY https://github.com/MrAxelius/FunctionParser.git
+        GIT_TAG main
+    )
+endif()
+
+# FunctionParser no necesita compilar sus tests ni sus ejemplos aquí
+set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(sfml FunctionParser)
 
 # ---- FUENTES COMPARTIDAS ----
 set(MODELO_SOURCES
@@ -40,8 +58,8 @@ add_executable(${PROJECT_NAME}
     ${MODELO_SOURCES}
     src/modelo/Camara.cpp
     src/vista/Vista.cpp
-    src/controlador/input.cpp
     src/vista/Transformador.cpp
+    src/controlador/Input.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src)
@@ -52,12 +70,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     sfml-system
     FunctionParser::FunctionParser
 )
-
-# Copiar las DLLs de SFML junto al ejecutable
-# add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#    $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-#    COMMAND_EXPAND_LISTS)
 
 # ---- BENCHMARK ----
 add_executable(benchmark_matriz
