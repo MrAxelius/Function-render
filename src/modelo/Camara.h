@@ -2,7 +2,7 @@
 #define CAMARA_H
 
 #include "Vector3.h"
-#include "controlador/input.h"
+#include "controlador/Input.h"
 
 struct Camara {
 
