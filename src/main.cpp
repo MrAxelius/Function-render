@@ -13,15 +13,14 @@
 #include "controlador/Input.h"
 #include "controlador/Entrada.h"
 
-
-void superficie3d(std::vector<sf::Drawable *> &dibujables, Camara &camara, Controlador::configuracionPantalla &pantalla)
+void superficie3d(Vista &vista, Camara &camara)
 {
     Matematicas::funcionParametrica valores;
     Matematicas::proyeccionOrtografica proyeccion;
-    static std::vector<Vector3> superficie;
+    std::vector<Vector3> superficie;
     superficie.reserve(valores.xPuntos * valores.yPuntos);
 
-    Matriz4x4 vista = Matriz4x4::lookAt(camara);
+    Matriz4x4 matrizVista = Matriz4x4::lookAt(camara);
 
     superficie = Matematicas::calcularSuperficie(valores);
     auto proyectar = Matriz4x4::crearOrtografica(proyeccion);
@@ -32,7 +31,7 @@ void superficie3d(std::vector<sf::Drawable *> &dibujables, Camara &camara, Contr
     }
     auto matrizProyeccion = *proyectar;
 
-    static sf::VertexArray funcion;
+    sf::VertexArray funcion;
     funcion.clear();
     funcion.setPrimitiveType(sf::PrimitiveType::TriangleStrip);
 
@@ -49,9 +48,9 @@ void superficie3d(std::vector<sf::Drawable *> &dibujables, Camara &camara, Contr
     {
         int idxPunto = i * columnas + j;
         const Vector3 &punto = superficie[idxPunto];
-        auto ndc = matrizProyeccion * (vista * punto);
-        float x_pantalla = (ndc.get_x() + 1.0f) * (pantalla.anchoPantalla / 2.0f);
-        float y_pantalla = (ndc.get_y() + 1.0f) * (pantalla.altoPantalla / 2.0f);
+        auto ndc = matrizProyeccion * (matrizVista * punto);
+        float x_pantalla = (ndc.get_x() + 1.0f) * (vista.getAnchoPantalla() / 2.0f);
+        float y_pantalla = (ndc.get_y() + 1.0f) * (vista.getAltoPantalla() / 2.0f);
 
         float z = punto.get_z();
         unsigned char intensidad = static_cast<unsigned char>((z + 1.0f) * 0.5f * 255.0f);
@@ -79,20 +78,15 @@ void superficie3d(std::vector<sf::Drawable *> &dibujables, Camara &camara, Contr
             ++indice;
         }
     }
-
-    dibujables.clear();
-    dibujables.push_back(&funcion);
+    vista.setSuperficie(funcion);
 }
 int main()
 {
     // Configuración de ventana
     Controlador::configuracionPantalla pantalla;
-    Controlador::rango rango{-2, 2}; 
-    int espacio_Entre_Casillas = 10;
-    float menorValorPantalla = std::min(pantalla.anchoPantalla, pantalla.altoPantalla);
+    Controlador::rango rango{-2, 2};
 
     sf::RenderWindow window(sf::VideoMode(pantalla.anchoPantalla, pantalla.altoPantalla), "Render de funciones");
-
 
     Vista vista(rango, window);
 
@@ -110,16 +104,13 @@ int main()
     camara.velocidadMovimiento = 2.0f;
     camara.updateEye(); // Calcula eye = (0, 0, 5)
 
-    // Vector de elementos a dibujar
-    std::vector<sf::Drawable *> dibujables;
-    // Just in case, no creo que haya que dibujar más de 10 funciones juntas.
-    dibujables.reserve(10);
 
     FunctionParser::Expression expresion(" x * x");
     FunctionParser::Rango rangoFuncion{-2, 2, 99};
     auto resultado = expresion.evaluateMesh(rangoFuncion);
+    vista.construirFuncion(resultado);
 
-    while (window.isOpen())
+    while(window.isOpen())
     {
         // 1. Procesar eventos
         while (window.pollEvent(evento))
@@ -140,18 +131,13 @@ int main()
 
         Entrada entrada = leerEntrada();
         camara.update(dt, entrada);
-        if (!vista.getModo3d())
-        {
-            // PIPELINE 2D
-            vista.funcion2d(resultado);
-        }
-        else
+        if (vista.getModo3d())
         {
             // PIPELINE 3D
-            superficie3d(dibujables, camara, pantalla);
+            superficie3d(vista, camara);
         }
 
-        vista.mostrar(dibujables, resultado);
+        vista.mostrar();
     }
 
     return 0;

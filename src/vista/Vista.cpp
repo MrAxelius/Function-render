@@ -14,11 +14,9 @@ namespace
 }
 
 Vista::Vista(Controlador::rango &rango, sf::RenderWindow &ventana)
-    : configuracion(obtenerTamañoPantalla(ventana)), ventana(ventana), transformador(configuracion, rango)
-{
-}
+    : configuracion(obtenerTamañoPantalla(ventana)), ventana(ventana), transformador(configuracion, rango) {}
 
-void Vista::mostrar(const std::vector<sf::Drawable *> &mostrado, const std::vector<FunctionParser::Punto> &puntos)
+void Vista::mostrar()
 {
     ventana.clear();
     if (!modo3d)
@@ -36,18 +34,20 @@ void Vista::mostrar(const std::vector<sf::Drawable *> &mostrado, const std::vect
             dibujarCuadricula();
             break;
         }
+
+        for (const auto &linea : tramosFuncion)
+        {
+            this->ventana.draw(linea);
+        }
     }
     else
     {
-        // Añadir la lógica de proyección
+        ventana.draw(this->superficie);
     }
-    for (const sf::Drawable *item : mostrado)
-    {
-        this->ventana.draw(*item);
-    }
-    funcion2d(puntos);
+
     ventana.display();
 }
+
 void Vista::dibujarCuadricula()
 {
     size_t mayorValorPantalla = std::max(configuracion.altoPantalla, configuracion.anchoPantalla);
@@ -88,6 +88,7 @@ void Vista::dibujarEjes()
     ventana.draw(Eje_x);
     ventana.draw(Eje_y);
 }
+
 void Vista::cambioEjes()
 {
     if (tipoEjes == 2)
@@ -100,19 +101,28 @@ void Vista::cambioEjes()
     }
 }
 
-void Vista::funcion2d(const std::vector<FunctionParser::Punto> &puntos)
+void Vista::construirFuncion(const std::vector<FunctionParser::Punto> &puntos)
 {
-    sf::VertexArray funcion (sf::PrimitiveType::LineStrip);
-    for (const auto& punto : puntos)
+    this->tramosFuncion.clear();
+    sf::VertexArray funcion(sf::PrimitiveType::LineStrip);
+    for (const auto &punto : puntos)
     {
-        if(std::isfinite(punto.y))
+        if (std::isfinite(punto.y))
         {
             auto puntoPantalla = transformador.Transformar(punto);
             funcion.append(sf::Vector2f(puntoPantalla.x, puntoPantalla.y));
-        }else{
-            ventana.draw(funcion);
+        }
+        else
+        {
+            if (funcion.getVertexCount() != 0)
+            {
+                this->tramosFuncion.push_back(funcion);
+            }
             funcion.clear();
         }
     }
-    ventana.draw(funcion);
+    if (funcion.getVertexCount() != 0)
+    {
+        this->tramosFuncion.push_back(funcion);
+    }
 }

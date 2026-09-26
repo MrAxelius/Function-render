@@ -13,6 +13,8 @@ private:
     Controlador::configuracionPantalla configuracion;
     sf::RenderWindow &ventana;
     Transformador transformador;
+    std::vector<sf::VertexArray> tramosFuncion; 
+    sf::VertexArray superficie;
 
     bool modo3d = false;
     int tipoEjes = 0;
@@ -20,14 +22,20 @@ private:
 public:
     Vista(Controlador::rango &rango, sf::RenderWindow &ventana);
     // Recibe ya el cuerpo limpio, y se llama por frame
-    void mostrar(const std::vector<sf::Drawable *> &mostrado, const std::vector<FunctionParser::Punto> &puntos);
+    void mostrar();
     void dibujarCuadricula();
     void dibujarEjes();
 
-    void funcion2d( const std::vector<FunctionParser::Punto>& puntos);
+    void construirFuncion (const std::vector<FunctionParser::Punto>& puntos);
+    void construirSuperficie (const std::vector<FunctionParser::Punto>& puntos);
 
     void cambioEjes();
     void invertirModo3d() { this->modo3d = !modo3d; }
 
     bool getModo3d() const { return this->modo3d; }
+    
+    int getAltoPantalla() const { return this->configuracion.altoPantalla;}
+    int getAnchoPantalla() const { return this->configuracion.anchoPantalla;}
+
+    void setSuperficie(const sf::VertexArray& superficie){ this->superficie = superficie; }
 };
