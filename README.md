@@ -1,49 +1,51 @@
-# Render de funciones
-Un render en 3D hecho en C++ y SFML. El proyecto nace de el amor por las matemáticas y las ganas de entender como funcionan los gráficos en 3D por debajo.
-El cómo se mueve la cámara, como transforman los puntos, como hacer las proyecciones... 
-SFML es una librería de trabajo 2D, así que la implementación el pipeline de transformación y las proyecciones viene desde cero.
+# Function-render
 
-En el estado actual, permite visualizar un cubo 3D, con rotaciones y cámara orbital interactiva. También permite el uso del 2D para representar funciones
-matemáticas básicas. Se puede alternar entre ambos modos desde el teclado.
+Un visor de funciones matemáticas en C++20 y SFML. Nace de las ganas de
+entender cómo funcionan los gráficos 3D por debajo: cómo se mueve la cámara,
+cómo se transforman los puntos, cómo se proyectan sobre la pantalla.
 
-## Que hace
-- **Modo 3D**: Muestra la superficie sin(x) * cos(y), la cual es orbitable con WASD. Se está trabajando en un zoom
-- **Modo 2D**: Representa la funcion 'y = - x ^ 2' sobre una cuadrícula.
-- **Cámara Orbital**: Control total por teclado
-- **Pipeline completo**: modelo -> vista -> proyección, implementado desde cero.
+SFML es una biblioteca 2D, así que el pipeline de transformación y las
+proyecciones están implementados desde cero.
 
-## Como compilar
-Requiere CMake, y un compilador C++17. SFML se descarga desde el CMakeList con el FetchContent(puede ser necesario compilar dos veces)
-BASH:
-git clone https://github.com/mraxeliuss-cloud/Function-render.git
-cd Function-renderer
-cmake -B build
-cmake --build build --config Release
+Las expresiones las analiza y evalúa
+[FunctionParser](https://github.com/MrAxelius/FunctionParser), una biblioteca
+propia desarrollada en paralelo a este proyecto.
 
-El ejecutable se genera en build/Release/Function_renderer.exe
+## Qué hace
+
+- **Modo 2D**: representa `y = f(x)` sobre unos ejes, con la curva partida en
+  los puntos donde la función no tiene valor (divisiones por cero, logaritmos
+  fuera de dominio).
+- **Modo 3D**: muestra la superficie `sin(x) * cos(y)` con cámara orbital.
+- **Cámara orbital**: control por teclado.
+- **Pipeline completo**: modelo → vista → proyección, escrito a mano.
 
 ## Controles
-- M -> Alterna modo
-- W/S -> Orbita verticalmente
-- A/D -> Orbita Horizontalmente
 
-## Estructura de archivos
-Sigue una estructura MVC.
-el código está en el /src
-src/
-|
-|---modelo/ modelo de datos y lógica de negocio
-|
-|---vista / nada aún
+| Tecla | Acción |
+|---|---|
+| `M` | alternar entre 2D y 3D |
+| `E` | ciclar entre sin ejes, ejes y cuadrícula (solo en 2D) |
+| `WASD` | orbitar la cámara (solo en 3D) |
 
-## Que queda por hacer (TBD)
-· Superficies paramétricas (En desarrollo)
-· Proyección en perspectiva (En desarrrollo)
-· Iluminación básica
-· Input de funciones
+## Cómo compilar
 
-## Que he aprendido con el proyecto
-· Como funcionan por dentro las transformaciones 3D
-· Implementar álgebra lineal desde 0 en C++
-· Manejo básico de CMake y SFML
-· Depuración de bugs, sobretodo comportamientos indefinidos
+Requiere CMake 3.20 o superior y un compilador con soporte de C++20.
+SFML y FunctionParser se descargan automáticamente con `FetchContent`.
+
+```bash
+git clone https://github.com/MrAxelius/Function-render.git
+cd Function-render
+cmake -B build -DBUILD_SHARED_LIBS=OFF
+cmake --build build --config Release
+```
+
+El ejecutable queda en `build/` (o `build/Release/` con Visual Studio).
+
+Si tienes [FunctionParser](https://github.com/MrAxelius/FunctionParser) clonado
+como carpeta hermana, se usa esa copia local en lugar de descargarla.
+
+## Estado
+
+En desarrollo. La expresión a representar está fija en el código; la entrada
+por teclado y el zoom están pendientes.
