@@ -26,8 +26,8 @@ public:
     void dibujarCuadricula();
     void dibujarEjes();
 
-    void construirFuncion (const std::vector<FunctionParser::Punto>& puntos);
-    void construirSuperficie (const std::vector<FunctionParser::Punto>& puntos);
+    void construirFuncion (const std::vector<FunctionParser::Point>& puntos);
+    void construirSuperficie (const std::vector<FunctionParser::Point>& puntos);
 
     void cambioEjes();
     void invertirModo3d() { this->modo3d = !modo3d; }

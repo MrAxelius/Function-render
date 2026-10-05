@@ -1,7 +1,7 @@
 #include "vista/Transformador.h"
 #include <FunctionParser/FunctionParser.h>
 
-PuntoPantalla Transformador::Transformar(const FunctionParser::Punto& puntoMundo) const
+PuntoPantalla Transformador::Transformar(const FunctionParser::Point& puntoMundo) const
 {
     PuntoPantalla resultado;
     resultado.x = static_cast<float>((puntoMundo.x - rango.xMin) * pixelPorUnidad);
