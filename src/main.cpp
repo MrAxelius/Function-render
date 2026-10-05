@@ -106,8 +106,8 @@ int main()
 
 
     FunctionParser::Expression expresion(" x * x");
-    FunctionParser::Rango rangoFuncion{-2, 2, 99};
-    auto resultado = expresion.evaluateMesh(rangoFuncion);
+    FunctionParser::Range rangoFuncion{-2, 2, 99};
+    auto resultado = expresion.evaluateFunction(rangoFuncion);
     vista.construirFuncion(resultado);
 
     while(window.isOpen())

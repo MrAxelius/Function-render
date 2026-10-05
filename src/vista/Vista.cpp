@@ -77,7 +77,7 @@ void Vista::dibujarEjes()
     static sf::RectangleShape Eje_x(sf::Vector2f(10000.f, 1.f));
     static sf::RectangleShape Eje_y(sf::Vector2f(1.f, 10000.f));
 
-    PuntoPantalla origen = transformador.Transformar(FunctionParser::Punto{0.0, 0.0});
+    PuntoPantalla origen = transformador.Transformar(FunctionParser::Point{0.0, 0.0});
 
     Eje_x.setFillColor(sf::Color::Blue);
     Eje_y.setFillColor(sf::Color::Blue);
@@ -101,7 +101,7 @@ void Vista::cambioEjes()
     }
 }
 
-void Vista::construirFuncion(const std::vector<FunctionParser::Punto> &puntos)
+void Vista::construirFuncion(const std::vector<FunctionParser::Point> &puntos)
 {
     this->tramosFuncion.clear();
     sf::VertexArray funcion(sf::PrimitiveType::LineStrip);
