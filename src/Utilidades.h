@@ -25,8 +25,8 @@ namespace Matematicas
         float izquierda = -8.0f;
         float arriba = 8.0f;
         float abajo = -8.0f;
-        float cerca = 0.1;
-        float lejos = 100;
+        float cerca = 0.1f;
+        float lejos = 100.0f;
     };
     // El inline resuelve el problema del linker, si no se pone, el código se duplica y el linker da error
     // En clases, structs y templates las funciones son implicitamente inline
@@ -45,8 +45,8 @@ namespace Matematicas
         // / 10 para no hacer una burrada de puntos, pero hacer una curva suave
         for (int i = 0; i < limite / 10; i++)
         {
-            x = i * 10;
-            y = i * (-i);
+            x = static_cast<float>(i) * 10;
+            y = static_cast<float>(i) * static_cast<float>(- i);
             funcion[i] = {x, y};
         }
         return funcion;
