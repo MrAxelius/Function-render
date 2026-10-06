@@ -41,6 +41,7 @@ FetchContent_Declare(
     sfml
     GIT_REPOSITORY https://github.com/SFML/SFML.git
     GIT_TAG 2.6.1
+    SYSTEM
 )
 
 # Ruta local a FunctionParser, para desarrollar los dos proyectos a la vez.
