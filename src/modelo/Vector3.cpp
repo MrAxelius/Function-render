@@ -2,7 +2,7 @@
 #include "Vector4.h"
 
 #include <stdexcept>
-#include <math.h>
+#include  <cmath>
 
 Vector3::Vector3(float x, float y, float z) : x(x), y(y), z(z)
 {
@@ -12,7 +12,7 @@ Vector3::Vector3(float x, float y, float z) : x(x), y(y), z(z)
 // Obtenemos el módulo
 float Vector3::magnitud() const
 {
-    return (sqrt((x * x) + (y * y) + (z * z)));
+    return (std::sqrt((x * x) + (y * y) + (z * z)));
 }
 
 // Dividimos todo por el módulo

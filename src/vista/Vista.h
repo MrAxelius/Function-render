@@ -37,5 +37,5 @@ public:
     int getAltoPantalla() const { return this->configuracion.altoPantalla;}
     int getAnchoPantalla() const { return this->configuracion.anchoPantalla;}
 
-    void setSuperficie(const sf::VertexArray& superficie){ this->superficie = superficie; }
+    void setSuperficie(const sf::VertexArray& superficieEntrada){ this->superficie = superficieEntrada; }
 };
